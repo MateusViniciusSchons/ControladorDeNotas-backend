@@ -9,6 +9,7 @@ app.use(cors());
 
 app.use(routes);
 
-app.listen(3333, _ => {
+const port = process.env.PORT || 3333;
+app.listen(port, _ => {
     console.log('[INDEX] Server running at port 3333') 
 });
