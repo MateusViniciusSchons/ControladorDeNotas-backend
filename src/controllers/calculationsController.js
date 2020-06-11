@@ -1,6 +1,6 @@
 module.exports = {
     calculateGrade(req, res) {
-        const { notas } = req.body;
+        const { notas, media } = req.body;
 
         let nullGrades = [];
         let grades = [];
@@ -25,7 +25,7 @@ module.exports = {
             grades.map(grade => {
                 somaGrades += grade.nota;
             });
-            resultado = ((7 * notas.length) - (somaGrades)) / nullGrades.length;
+            resultado = ((media * notas.length) - (somaGrades)) / nullGrades.length;
         } else {  //ponderada
             let somaGrades = 0; // soma das notas q tem multiplicadas pelo seu peso
             let somaPesos = 0; // soma dos pesos que não tem sua nota
@@ -36,7 +36,7 @@ module.exports = {
                 somaPesos += grade.peso;
             })
             // (valor mínimo da média escolar x 10 (no caso, 70 é a do IFFar) - (soma das notas multiplicadas com os pesos)) / soma dos pesos sem nota 
-            resultado = (70 - somaGrades) / somaPesos;
+            resultado = ((media * 10) - somaGrades) / somaPesos;
         }
 
         // nota -> nota que deve tirar;
