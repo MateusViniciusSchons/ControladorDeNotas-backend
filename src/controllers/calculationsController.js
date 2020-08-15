@@ -50,9 +50,20 @@ module.exports = {
         res.json({ notas: nullGrades })
     },
     calculateFinalAverage(req, res) {
-        const { mediaSemestre1: semestre1 } = req.body;
+        const { semestre1, media } = req.body;
 
-        let semestre2 = (7 - (semestre1 * 0.4)) / 0.6;
+        let semestre2 = (media - (semestre1.nota * (semestre1.peso / 10))) / (1 - (semestre1.peso / 10));
         res.json({ nota: semestre2.toFixed(2) });
     }
 }
+
+/*
+    JSON Final Average: 
+    {
+        semestre1: {
+            nota: 7,
+            peso: 4
+        },
+        media: 7
+    }
+*/
