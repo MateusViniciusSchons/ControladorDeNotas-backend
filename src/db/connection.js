@@ -1,4 +1,4 @@
-const mysql = require('mysql2') // Importa o módulo do mysql
+/*const mysql = require('mysql2') // Importa o módulo do mysql
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -7,4 +7,16 @@ const connection = mysql.createConnection({
     database: process.env.DB_NAME,
 })
 
-module.exports = connection
+module.exports = connection */ 
+
+// *********************************** Refeito com MongoDB por problemas particulares*****************************
+
+const mongoose = require('mongoose');
+
+mongoose.connect(process.env.DB_MONGO_CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
+
+const db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'connection error:'));
+
+module.exports = db;

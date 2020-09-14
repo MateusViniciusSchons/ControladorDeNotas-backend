@@ -1,85 +1,45 @@
-const connection = require('../db/connection');
+const Matter = require('../models/Matter');
 
 module.exports = {
     async index(req, res) {
         const { matterid: matterId } = req.params;
+
         try {
-            await connection.execute(
-                `SELECT id, nota, valor AS peso FROM notas 
-                    WHERE materiaId = ?`,
-                [matterId],
-                (err, result, fields) => {
-                    return err
-                    ? res.json({ erro: { message: "erro " + err } })
-                    : res.json(result)
+            const matter = await Matter.findById(matterId, 'grades');
+            grades = matter.grades.map(grade => {
+                return{
+                    id: grade.id,
+                    peso: grade.weight,
+                    nota:  grade.value,
                 }
-            );
-        }
-        catch(error) {
-            returnconsole.log('ERRO: ' + error)
+                
+            });
+            return res.json(grades);
+        } catch (error) {
+            console.log(error);
+            return res.json({ error: "Erro ao listar notas" })
         }
     },
     async update(req, res) {
         let { matterId } = req.body.matter;
         const { grades } = req.body;
-
         try {
-            grades.map(async grade => {
-                if(!grade.id) {
-                    await connection.execute(
-                        `INSERT INTO notas (materiaId, nota, valor) values(?, ?, ?)`,
-                        [matterId, grade.value === ''? null: grade.value, grade.weight === ''? null: grade.weight],
-                        (err, result, fields) => {
-                            console.log(
-                              err  
-                              ? "[GRADES CONTROLLER > UPDATE] Erro: " + err
-                              : 'cadastrado'
-                            );
-                        }
-                    );
-                    } else {
-                        if(grade.delete === true) {
-                            await connection.execute(
-                                `DELETE FROM notas
-                                    WHERE id = ?`,
-                                    [grade.id],
-                                    (err, result, fields) => {
-                                        return err
-                                        ? err
-                                        : null
-                                    }
-                            );
-                        } else {
-                            await connection.execute(
-                                `UPDATE notas 
-                                    SET nota = ?,
-                                    valor = ?
-                                        WHERE id = ?`,
-                                [grade.value === ''? null: grade.value, grade.weight == ''? null: grade.weight, grade.id],
-                                (err, result, fields) => {
-                                    return err
-                                    ? err
-                                    : null
-                                }
-                            );
-                        }
-                    }
-                })
-            } catch (error) {
-                console.log("[GRADES CONTROLLER > UPDATE] Erro: " + error);
-            }
+            let newGrades = grades.filter(grade => !grade.delete)
 
-        
-            await connection.execute(
-                `SELECT id, nota, valor AS peso FROM notas 
-                    WHERE materiaId = ?`,
-                [matterId],
-                (err, result, fields) => {
-                    return err
-                    ? res.json({ erro: { message: "erro " + err } })
-                    : res.json(result)
+            newGrades = newGrades.map(grade => {
+                return {
+                    id: grade._id,
+                    value: grade.value === ''? null: grade.value,
+                    weight: grade.weight === ''? null: grade.weight,
+                    isResponse: grade.isResponse,
                 }
-            );
-        
+            })
+
+            matter = await Matter.findByIdAndUpdate(matterId, { grades: newGrades });
+            return res.json(newGrades);
+        } catch (error) {
+            console.log(error);
+            return res.json({ error: "Erro ao tentar atualizar notas da matéria" });
+        }
     }
 }

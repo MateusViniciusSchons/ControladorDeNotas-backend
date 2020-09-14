@@ -4,6 +4,8 @@ require("dotenv").config(); // Configura as variáveis de ambiente
 const express = require('express');
 const cors = require('cors');
 
+const conection = require('./db/connection');
+
 //Importa as rotas
 const routes = require('./routes');
 

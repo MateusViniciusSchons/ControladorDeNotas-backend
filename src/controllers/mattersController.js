@@ -1,60 +1,49 @@
-const connection = require('../db/connection');
+//const connection = require('../db/connection');
+
+const Matter = require('../models/Matter');
 
 module.exports = {
     async show(req, res) {
         const { userid: userId } = req.headers;
         const { id: matterId } = req.params
+
         try {
-            await connection.execute(
-                `SELECT name FROM materias
-                    WHERE userId = ?
-                    AND id = ?`,
-                [userId, matterId],
-                (err, result, fields) => {
-                    return err
-                        ? console.log(err)
-                        : res.json(result[0])
-                }
-            )
-        } catch (error) {
-            console.log(error)
+            let matter = await Matter.findById(matterId, 'name');
+            return res.json({ id: matter._id, name: matter.name });
+        } catch(error) {
+            console.log(error);
+            return res.json({error: "Erro ao procurar uma matéria"});
         }
-        
     },
     async index(req, res) {
         const { userid: userId } = req.headers;
+
         try {
-            await connection.execute(
-                `SELECT id, name FROM materias
-                    WHERE userId = ?`,
-                [userId],
-                (err, result, fields) => {
-                    return err
-                        ? console.log(err)
-                        : res.json(result)
-                }
-            )
+            let matters = await Matter.find({ userId }, 'name _id');
+            matters = matters.map(matter => {
+                return { id : matter._id, name: matter.name}
+            })
+            return res.json(matters);
         } catch (error) {
             console.log(error)
+            return res.json({error: "Erro ao listar matérias"});
         }
     },
     async store(req, res) {
         const { matterName } = req.body;
         const { userid: userId } = req.headers;
 
-        try {
-            await connection.execute(
-                `INSERT INTO materias (name, userId) values(?, ?)`,
-                [matterName, userId],
-                (err, result, fields) => {
-                    return err
-                    ? res.json({ error: { message: "erro: " + err}})
-                    : res.json({ id: result.insertId });
-                }
-            );
-        } catch (error) {
-            console.log('erro' + error)
+        
+        try{
+            const matter = new Matter({name: matterName, userId});
+            let result = await matter.save();
+            return res.json({ id: result._id });
         }
+        catch(e) {
+            console.log(e);
+            return res.json({ error: "Erro ao cadastrar matéria" });
+        }
+
     },
     async update(req, res) {
         const { userid: userId } = req.headers;
@@ -62,49 +51,22 @@ module.exports = {
         const { matterid: matterId } = req.params;
         
         try {
-            await connection.execute(
-                `UPDATE materias
-                    SET name = ?
-                        WHERE id = ?
-                        AND userId = ?`,
-                [matterName, matterId, userId],
-                (err, result, fields) => {
-                    return err
-                    ? res.json({error: {message: "erro " + err}})
-                    : res.json({ ok: true })
-                }
-            )
-        } catch (error) {
-            console.log(error)
+            await Matter.findOneAndUpdate({ _id: matterId }, { name: matterName });
+                return res.json({ ok: true });
+        } catch(error) {
+            console.log(error);
+            return res.josn({ error: 'erro ao atualizar matéria' });
         }
     },
     async delete(req, res) {
         const { matterid: matterId } = req.params
+
         try {
-            await connection.execute(
-                `delete from notas 
-                    where materiaId = ?`,
-                [matterId],
-                async (err, result, fields) => {
-                    if(err) return console.log(err)
-                    
-                    await connection.execute(
-                        `DELETE FROM materias
-                        WHERE id = ?`,
-                        [matterId],
-                        (err, result, fields) => {
-                            return err
-                            ? console.log(err)
-                            : res.json({ message: "Matéria deletada com sucesso" })
-                        }
-                    )
-                    
-                }
-            )
+            await Matter.findByIdAndDelete(matterId);
+            return res.json({ ok: true });
+        } catch (error) {
+            console.log(error);
+            return res.json({ error: 'Erro ao deletar Matéria' });
         }
-        catch(e) {
-            return console.log("erro " + e)
-        }
-        
     },
 }

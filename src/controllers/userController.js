@@ -1,46 +1,29 @@
-const connection = require('../db/connection') // Importa a conexão com o banco de dados
+const User = require('../models/User');
 
 module.exports = {
     async store(req, res) {
-        // Pega as informações do corpo da requisição
         const { name, email, password, average } = req.body;
-
+        let userDuplicated;
         try {
-            // Verifica se ainda não existe usuário com esse email
-            await connection.execute(
-                `SELECT email FROM users
-                    WHERE email = ?`,
-                [email],
-                async (err, results, fields) => {
-                    if(!err) {
-                        if(results.length === 0) {
-                            await connection.execute(
-                                "INSERT INTO users (name, email, password, average) values(?, ?, ?, ?)",
-                                [name, email, password, average],
-                                (err, results, fields) => {
-                                    if(!err) {
-                                        res.json({ id: results.insertId })
-                                    }else {
-                                        console.log("[USER CONTROLLER] Erro ao cadastrar usuário no banco: " + err)
-                                    }
-                                }
-                            )
-                        } else {
-                            res.json({
-                                error: "E-mail duplicado"
-                            })
-                        }
-                    } else {
-                        console.log(err)
-                        return;
-                    }
-                    
-                }
-            )
+            userDuplicated = await User.findOne({ email }).exec();
+        } catch (error) {
+            console.log(error);
         }
-        catch(err) {
-            console.log("[USER CONTROLLER] Erro ao cadastrar usuário no banco: " + err)
+
+        if(!userDuplicated) {
+            try {
+                const user = new User({ name, email, password, average });
+
+                await user.save();
+
+                return res.json({ ok: true });
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
+            return res.json({
+                error: "E-mail duplicado",
+            });
         }
-        
     }
 }
