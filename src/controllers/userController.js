@@ -12,11 +12,11 @@ module.exports = {
 
         if(!userDuplicated) {
             try {
-                const user = new User({ name, email, password, average });
+                let user = new User({ name, email, password, average });
 
-                await user.save();
+                user = await user.save();
 
-                return res.json({ ok: true });
+                return res.json({ id: user._id });
             } catch (error) {
                 console.log(error);
             }
