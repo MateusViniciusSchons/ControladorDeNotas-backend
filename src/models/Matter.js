@@ -10,6 +10,10 @@ const matterSchema = new mongoose.Schema({
         isResponse: { type: Boolean, required: false },
     }],
     userId: mongoose.ObjectId,
+    average: {
+        type: Number,
+        required: false,
+    }
 });
 
 const Matter = new mongoose.model('Matter', matterSchema);

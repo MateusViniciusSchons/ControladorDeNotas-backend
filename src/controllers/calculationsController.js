@@ -41,9 +41,8 @@ module.exports = {
 
         // nota -> nota que deve tirar;
         // notas que faltam -> Array de notas que estão nulas;
-        // RETORNAR UM ARRAY COM TODAS AS NOTAS Q PRECISA TIRAR E PESOS AO INVÉS DISSO --foi
         nullGrades.map(grade => {
-            grade.nota = resultado.toFixed(2)
+            grade.nota = Number(resultado > 0? resultado.toFixed(2): 0);
             grade.isResponse = true;
         });
 

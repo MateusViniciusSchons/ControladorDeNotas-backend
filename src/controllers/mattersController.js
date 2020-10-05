@@ -1,5 +1,3 @@
-//const connection = require('../db/connection');
-
 const Matter = require('../models/Matter');
 
 module.exports = {
@@ -8,8 +6,8 @@ module.exports = {
         const { id: matterId } = req.params
 
         try {
-            let matter = await Matter.findById(matterId, 'name');
-            return res.json({ id: matter._id, name: matter.name });
+            let matter = await Matter.findById(matterId, 'name average');
+            return res.json({ id: matter._id, name: matter.name, average: matter.average });
         } catch(error) {
             console.log(error);
             return res.json({error: "Erro ao procurar uma matéria"});
@@ -30,12 +28,12 @@ module.exports = {
         }
     },
     async store(req, res) {
-        const { matterName } = req.body;
+        const { matterName, average } = req.body;
         const { userid: userId } = req.headers;
 
         
         try{
-            const matter = new Matter({name: matterName, userId});
+            const matter = new Matter({name: matterName, userId, average});
             let result = await matter.save();
             return res.json({ id: result._id });
         }
@@ -47,11 +45,11 @@ module.exports = {
     },
     async update(req, res) {
         const { userid: userId } = req.headers;
-        const { matterName } = req.body;
+        const { matterName, average } = req.body;
         const { matterid: matterId } = req.params;
         
         try {
-            await Matter.findOneAndUpdate({ _id: matterId }, { name: matterName });
+            await Matter.findOneAndUpdate({ _id: matterId }, { name: matterName, average });
                 return res.json({ ok: true });
         } catch(error) {
             console.log(error);

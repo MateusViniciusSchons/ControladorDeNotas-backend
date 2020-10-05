@@ -11,6 +11,7 @@ module.exports = {
                     id: grade.id,
                     peso: grade.weight,
                     nota:  grade.value,
+                    isResponse: grade.isResponse,
                 }
                 
             });
